@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo THIS WILL RUN "make clean"...... ENTER TO CONTINUE
+read WAIT
+
 cd Kernel
 make arch=arm -j4 clean
 make arch=arm -j4 prepare

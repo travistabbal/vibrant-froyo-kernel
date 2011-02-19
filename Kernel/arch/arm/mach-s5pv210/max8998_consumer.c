@@ -175,6 +175,8 @@ static const unsigned int dvs_arm_voltage_set[][2] = {
 };
 #endif
 
+extern int exp_UV_mV[5];
+
 static int set_max8998(unsigned int pwr, enum perf_level p_lv)
 {
 	int voltage;
@@ -185,14 +187,17 @@ static int set_max8998(unsigned int pwr, enum perf_level p_lv)
 	DBG("%s : p_lv = %d : pwr = %d \n", __FUNCTION__, p_lv,pwr);
 
 	if(pwr == PMIC_ARM) {
-		voltage = frequency_match_tab[p_lv][pwr + 1];
+//		voltage = frequency_match_tab[p_lv][pwr + 1];
+		voltage = frequency_match_tab[p_lv][pwr + 1] - exp_UV_mV[p_lv];
 
 		if(voltage == s_arm_voltage)
 			return ret;
 
 		pmic_val = voltage * 1000;
 		
-		DBG("regulator_set_voltage =%d\n",voltage);
+//		DBG("regulator_set_voltage =%d\n",voltage);
+		DBG("regulator_set_voltage =%dmA @ %dMHz-%d UV=%d\n",voltage,frequency_match_tab[p_lv][pwr]/1000,p_lv,exp_UV_mV[p_lv]);
+		printk(KERN_CRIT "regulator_set_voltage =%dmA @ %dMHz-%d UV=%d\n",voltage,frequency_match_tab[p_lv][pwr]/1000,p_lv,exp_UV_mV[p_lv]);
 		/*set Arm voltage*/
 		ret = regulator_set_voltage(Reg_Arm,pmic_val,pmic_val);
 	        if(ret != 0)
@@ -216,7 +221,7 @@ static int set_max8998(unsigned int pwr, enum perf_level p_lv)
 
 		pmic_val = voltage * 1000;
 
-		DBG("regulator_set_voltage = %d\n",voltage);
+//		DBG("regulator_set_voltage = %d\n",voltage);
 		/*set Arm voltage*/
 		ret = regulator_set_voltage(Reg_Int, pmic_val, pmic_val);
 	        if(ret != 0)

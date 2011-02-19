@@ -48,7 +48,11 @@ else
 ifeq ($(CONFIG_S5PC110_VIBRANTPLUS_BOARD),y)
 snd-soc-wm8994-objs := wm8994.o wm8994_vibrantplus.o HAC.o  ttymisc.o
 else
+ifeq ($(CONFIG_SND_VOODOO),y)
+snd-soc-wm8994-objs := wm8994.o wm8994_aries.o wm8994_voodoo.o HAC.o
+else
 snd-soc-wm8994-objs := wm8994.o wm8994_aries.o HAC.o
+endif
 endif
 endif
 endif

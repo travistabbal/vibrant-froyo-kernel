@@ -40,9 +40,47 @@
 #endif
 /*******************************************************************************/
 
+//sysfs support for SpeedMod
+bool auto_min_dark = true;
+double light_level1_lux = 6.0;
 
+static ssize_t auto_min_dark_show(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf,"%u\n",(auto_min_dark ? 1 : 0));
+}
 
+static ssize_t auto_min_dark_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	unsigned short state;
+	if (sscanf(buf, "%hu", &state) == 1)
+	{
+		auto_min_dark = state == 0 ? false : true;
+		//do this after value is changed
+		if (auto_min_dark) {
+			light_level1_lux = 6.0;
+		} else {
+			light_level1_lux = 1000.0;
+		}		
+	}
+	return size;
+}
 
+static DEVICE_ATTR(auto_min_dark, S_IRUGO | S_IWUGO , auto_min_dark_show, auto_min_dark_store);
+
+static struct attribute *speedmodk_gp2a_attributes[] = {
+		&dev_attr_auto_min_dark.attr,
+		NULL
+};
+
+static struct attribute_group speedmodk_gp2a_group = {
+		.attrs  = speedmodk_gp2a_attributes,
+};
+
+static struct miscdevice speedmodk_gp2a_device = {
+		.minor = MISC_DYNAMIC_MINOR,
+		.name = "speedmodk_gp2a",
+};
+// sysfs support for SpeedMod end
 
 /* global var */
 struct class *lightsensor_class;
@@ -217,90 +255,93 @@ static void gp2a_work_func_light(struct work_struct *work)
 
 	/* read adc data from s5p110 */
 	adc = lightsensor_get_adcvalue();
-	gprintk("Optimized adc = %d \n",adc);
+	/*gprintk("Optimized adc = %d \n",adc);
 	gprintk("cur_state = %d\n",cur_state);
-	gprintk("light_enable = %d\n",light_enable);
+	gprintk("light_enable = %d\n",light_enable);*/
+	
+	//printk("Optimized adc = %d , cur_state = %d\n",adc,cur_state); //debug only, remove later
+	
 #if 1 //add 150lux
-	if(adc >= 2100)
+	if(adc >= 1800) //if(adc >= 2100)
 	{
 		level_state = LIGHT_LEVEL5;
 		buffering = 5;
 	}
-	else if(adc >= 1900 && adc < 2100)
+	else if(adc >= 1600)// && adc < 1800) //else if(adc >= 1900 && adc < 2100)
 	{
 		if(buffering == 5)
 		{	
 			level_state = LIGHT_LEVEL5;
 			buffering = 5;
 		}
-		else if((buffering == 1)||(buffering == 2)||(buffering == 3)||(buffering == 4))
+		else //if((buffering == 1)||(buffering == 2)||(buffering == 3)||(buffering == 4))
 		{
 			level_state = LIGHT_LEVEL4;
 			buffering = 4;
 		}
 	}
 
-	else if(adc >= 1800 && adc < 1900)
+	else if(adc >= 1200)// && adc < 1600) //else if(adc >= 1800 && adc < 1900)
 	{
 		level_state = LIGHT_LEVEL4;
 		buffering = 4;
 	}
 
-	else if(adc >= 1200 && adc < 1800)
+	else if(adc >= 1000)// && adc < 1200) //else if(adc >= 1200 && adc < 1800)
 	{
-		if((buffering == 4)||(buffering == 5))
+		if(buffering >= 4) //if((buffering == 4)||(buffering == 5))
 		{	
 			level_state = LIGHT_LEVEL4;
 			buffering = 4;
 		}
-		else if((buffering == 1)||(buffering == 2)||(buffering == 3))
+		else //if((buffering == 1)||(buffering == 2)||(buffering == 3))
 		{
 			level_state = LIGHT_LEVEL3;
 			buffering = 3;
 		}
 	}
 	
-	else if(adc >= 800 && adc < 1200)
+	else if(adc >= 700)// && adc < 1000) //else if(adc >= 800 && adc < 1200)
 	{
 		level_state = LIGHT_LEVEL3;
 		buffering = 3;
 	}
 
-	else if(adc >= 600 && adc < 800)
+	else if(adc >= 500)// && adc < 700) //else if(adc >= 600 && adc < 800)
 	{
-		if((buffering == 3)||(buffering == 4)||(buffering == 5))
+		if(buffering >= 3) //if((buffering == 3)||(buffering == 4)||(buffering == 5))
 		{	
 			level_state = LIGHT_LEVEL3;
 			buffering = 3;
 		}
-		else if((buffering == 1)||(buffering == 2))
+		else //if((buffering == 1)||(buffering == 2))
 		{
 			level_state = LIGHT_LEVEL2;
 			buffering = 2;
 		}
 	}
 
-	else if(adc >= 400 && adc < 600)
+	else if(adc >= 70)// && adc < 500) //70-500 //else if(adc >= 400 && adc < 600)
 	{
 		level_state = LIGHT_LEVEL2;
 		buffering = 2;
 	}
 	
-	else if(adc >= 250 && adc < 400)
+	else if(adc >= 50)// && adc < 70) //50-70 //else if(adc >= 250 && adc < 400)
 	{
-		if((buffering == 2)||(buffering == 3)||(buffering == 4)||(buffering == 5))
+		if(buffering >= 2) //if((buffering == 2)||(buffering == 3)||(buffering == 4)||(buffering == 5))
 		{	
 			level_state = LIGHT_LEVEL2;
 			buffering = 2;
 		}
-		else if(buffering == 1)
+		else //if(buffering == 1)
 		{
 			level_state = LIGHT_LEVEL1;
 			buffering = 1;
 		}
 	}
 
-	else if(adc < 250)
+	else //if(adc < 50) //50 //else if(adc < 250)
 	{
 		level_state = LIGHT_LEVEL1;
 		buffering = 1;
@@ -308,7 +349,7 @@ static void gp2a_work_func_light(struct work_struct *work)
 #endif
 	if((backlight_level > 5)&&(!lightsensor_test))
 	{
-		gprintk("backlight_level = %d\n", backlight_level); //Temp
+		//gprintk("backlight_level = %d\n", backlight_level); //Temp
 		cur_state = level_state;	
 	}
 #ifdef CONFIG_FB_S3C_MDNIE_TUNINGMODE_FOR_BACKLIGHT
@@ -504,7 +545,7 @@ static enum hrtimer_restart gp2a_timer_func(struct hrtimer *timer)
 	queue_work(gp2a_wq, &gp2a->work_light);
 	//hrtimer_start(&gp2a->timer,ktime_set(LIGHT_PERIOD,0),HRTIMER_MODE_REL);
 	light_polling_time = ktime_set(0,0);
-	light_polling_time = ktime_add_us(light_polling_time,500000);
+	light_polling_time = ktime_add_us(light_polling_time,1200000);
 	hrtimer_start(&gp2a->timer,light_polling_time,HRTIMER_MODE_REL);
 	return HRTIMER_NORESTART;
 }
@@ -813,7 +854,7 @@ void gp2a_on(struct gp2a_data *gp2a, int type)
 	{
 		gprintk(KERN_INFO "[LIGHT_SENSOR] timer start for light sensor\n");
 		light_polling_time = ktime_set(0,0);
-		light_polling_time = ktime_add_us(light_polling_time,500000);
+		light_polling_time = ktime_add_us(light_polling_time,1200000);
 	    //hrtimer_start(&gp2a->timer,ktime_set(LIGHT_PERIOD,0),HRTIMER_MODE_REL);
 	    hrtimer_start(&gp2a->timer,light_polling_time,HRTIMER_MODE_REL);
 		light_enable = ON;
@@ -1219,6 +1260,14 @@ static int gp2a_opt_suspend( struct platform_device* pdev, pm_message_t state )
 
 
 
+	// register speedmod sysfs
+	misc_register(&speedmodk_gp2a_device);
+	if (sysfs_create_group(&speedmodk_gp2a_device.this_device->kobj, &speedmodk_gp2a_group) < 0)
+	{
+		printk("%s sysfs_create_group fail\n", __FUNCTION__);
+		pr_err("Failed to create sysfs group for device (%s)!\n", speedmodk_gp2a_device.name);
+	}
+	
 	return 0;
 }
 
@@ -1279,7 +1328,7 @@ static int gp2a_opt_resume( struct platform_device* pdev )
 		#if 0
 		gprintk("[%s] : hrtimer_start \n",__func__);
 	       light_polling_time = ktime_set(0,0);
-		light_polling_time = ktime_add_us(light_polling_time,500000);
+		light_polling_time = ktime_add_us(light_polling_time,1200000);
 		hrtimer_start(&gp2a->timer,light_polling_time,HRTIMER_MODE_REL);
 		#endif
 	}
@@ -1293,7 +1342,7 @@ static double StateToLux(state_type state)
 {
 	double lux = 0;
 	
-	gprintk("[%s] cur_state:%d\n",__func__,state);
+/*	gprintk("[%s] cur_state:%d\n",__func__,state);
 
 	if(state== LIGHT_LEVEL5){
 		lux = 15000.0;
@@ -1314,6 +1363,28 @@ static double StateToLux(state_type state)
 	else {
 		lux = 5000.0;
 		gprintk("[%s] cur_state fail\n",__func__);
+	}
+	*/
+	switch (state)
+	{
+	case LIGHT_LEVEL5:
+		lux = 15000.0;
+	break;
+	case LIGHT_LEVEL4:
+		lux = 9000.0;
+	break;
+	case LIGHT_LEVEL3:
+		lux = 5000.0;
+	break;
+	case LIGHT_LEVEL2:
+		lux = 1000.0;
+	break;
+	case LIGHT_LEVEL1:
+		lux = light_level1_lux;
+	break;
+	default:
+		lux = 5000.0;
+	break;	
 	}
 	return lux;
 }
@@ -1539,4 +1610,3 @@ module_exit( gp2a_opt_exit );
 MODULE_AUTHOR("SAMSUNG");
 MODULE_DESCRIPTION("Optical Sensor driver for gp2ap002a00f");
 MODULE_LICENSE("GPL");
-

@@ -93,11 +93,16 @@ static const unsigned int frequency_match_1GHZ[][4] = {
         {200000, 1000, 1150, 4},
         {100000, 1000, 1050, 5},
 #else
-        {1000000, 1275, 1100, 0},
-        {800000, 1200, 1100, 1},
-        {400000, 1050, 1100, 2},
-        {200000, 950, 1100, 4},
-        {100000, 950, 1000, 5},
+        {1400000, 1500, 1150, 0},
+        {1360000, 1500, 1150, 0},
+        {1280000, 1400, 1150, 0},
+        {1200000, 1400, 1150, 0},
+        {1120000, 1400, 1150, 0},
+        {1000000, 1400, 1150, 1},
+        {800000, 1200, 1150, 2},
+        {400000, 1100, 1150, 3},
+        {200000, 1100, 1150, 4},
+        {100000, 1100, 1100, 5},
 #endif
 #else //just for dvs test
         {1000000, 1250, 1100, 0},
@@ -166,16 +171,16 @@ const unsigned int (*dvs_volt_table[2])[3] = {
 };
 
 static const unsigned int dvs_arm_voltage_set[][2] = {
-	{DVSARM1, 1275},
-	{DVSARM2, 1200},
-	{DVSARM3, 1050},
-	{DVSARM4, 950},
-	{DVSINT1, 1100},
-	{DVSINT2, 1000},
+	{DVSARM1, 1500},
+	{DVSARM2, 1400},
+	{DVSARM3, 1200},
+	{DVSARM4, 1100},
+	{DVSINT1, 1150},
+	{DVSINT2, 1100},
 };
 #endif
 
-extern int exp_UV_mV[5];
+extern int exp_UV_mV[10];
 
 static int set_max8998(unsigned int pwr, enum perf_level p_lv)
 {

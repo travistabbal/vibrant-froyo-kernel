@@ -32,7 +32,7 @@
 #define dprintk(msg...) cpufreq_debug_printk(CPUFREQ_DEBUG_CORE, \
 						"cpufreq-core", msg)
 
-int exp_UV_mV[5]={0};
+int exp_UV_mV[10]={0};
 int exp_states_enabled[10]={0,0,0,0,0,1,1,1,1,1};
 int exp_update_states=1;
 
@@ -616,14 +616,14 @@ static ssize_t store_scaling_governor(struct cpufreq_policy *policy,
 
 static ssize_t show_UV_mV_table(struct cpufreq_policy *policy, char *buf)
 {
-	return sprintf(buf, "%d %d %d %d %d\n", exp_UV_mV[0],exp_UV_mV[1],exp_UV_mV[2],exp_UV_mV[3],exp_UV_mV[4]);
+	return sprintf(buf, "%d %d %d %d %d %d %d %d %d %d\n", exp_UV_mV[0],exp_UV_mV[1],exp_UV_mV[2],exp_UV_mV[3],exp_UV_mV[4],exp_UV_mV[5],exp_UV_mV[6],exp_UV_mV[7],exp_UV_mV[8],exp_UV_mV[9]);
 }
 
 static ssize_t store_UV_mV_table(struct cpufreq_policy *policy,	const char *buf, size_t count)
 {
 	unsigned int ret = -EINVAL;
 
-	ret = sscanf(buf, "%d %d %d %d %d", &exp_UV_mV[0],&exp_UV_mV[1],&exp_UV_mV[2],&exp_UV_mV[3],&exp_UV_mV[4]);
+	ret = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d", &exp_UV_mV[0],&exp_UV_mV[1],&exp_UV_mV[2],&exp_UV_mV[3],&exp_UV_mV[4],&exp_UV_mV[5],&exp_UV_mV[6],&exp_UV_mV[7],&exp_UV_mV[8],&exp_UV_mV[9]);
 	if (ret != 1)
 		return -EINVAL;
 	else
@@ -1133,7 +1133,7 @@ static int cpufreq_add_dev(struct sys_device *sys_dev)
 		goto err_unlock_policy;
 	}
 	policy->user_policy.min = policy->min;
-	policy->user_policy.max = policy->max;
+	policy->user_policy.max = 1000000;
 
 	blocking_notifier_call_chain(&cpufreq_policy_notifier_list,
 				     CPUFREQ_START, policy);

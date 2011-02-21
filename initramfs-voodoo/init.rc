@@ -29,7 +29,7 @@ loglevel 3
     insmod /lib/modules/vibrator.ko
 
 	# ko files for Fm radio
-	insmod /lib/modules/Si4709_driver.ko
+#	insmod /lib/modules/Si4709_driver.ko
 	
 #add booting sound property 
 	setprop audioflinger.bootsnd 1

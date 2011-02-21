@@ -27,11 +27,7 @@ extern struct snd_soc_codec_device soc_codec_dev_wm8994;
 //-----------------------------------------------------------
 // Added belows codes by Samsung Electronics.
 
-#if defined CONFIG_S5PC110_KEPLER_BOARD
-#include "wm8994_def_kepler.h"
-#else
-#include "wm8994_def_behold3.h"
-#endif
+#include "wm8994_def.h"
 
 extern struct snd_soc_dai wm8994_dai;
 
@@ -44,20 +40,26 @@ extern struct snd_soc_dai wm8994_dai;
 #if defined CONFIG_SND_SOC_WM8994_PCM
 #define ATTACH_ADDITINAL_PCM_DRIVER	// for VT call.
 #endif
+
+//------------------------------------------------
+// Definitions of Feature for VoIP and 3 Pole
+//------------------------------------------------
+#if !(defined (CONFIG_ARIES_NTT))
+#define FEATURE_VOIP
+#define FEATURE_3POLE_CALL_SUPPORT
+#endif
+
 //------------------------------------------------
 // Definitions of enum type
 //------------------------------------------------
-enum playback_path	{ PLAYBACK_OFF, RCV, SPK, HP, BT, DUAL, RING_SPK, RING_HP, RING_DUAL, EXTRA_DOCK_SPEAKER, TV_OUT};
+enum playback_path	{ PLAYBACK_OFF, RCV, SPK, HP, BT, DUAL, RING_SPK, RING_HP, RING_DUAL, EXTRA_DOCK_SPEAKER, TV_OUT, HP_3POLE = 5};
 enum mic_path		{ MAIN, SUB, BT_REC, MIC_OFF};
 enum fmradio_path { FMR_OFF, FMR_SPK, FMR_HP, FMR_SPK_MIX, FMR_HP_MIX, FMR_DUAL_MIX};
 enum fmradio_mix_path	{ FMR_MIX_OFF, FMR_MIX_HP, FMR_MIX_SPK, FMR_MIX_DUAL};
 enum power_state	{ CODEC_OFF, CODEC_ON };
 enum recognition	{REC_OFF, REC_ON};
 enum state{OFF, ON};
-enum factory_test          { SEC_NORMAL, SEC_TEST_HWCODEC , SEC_TEST_15MODE, SEC_TEST_PBA_LOOPBACK, SEC_TEST_PBA_DUAL_SPK, SEC_TEST_HQRL_LOOPBACK};
-enum voice_record_path     { CALL_RECORDING_OFF, CALL_RECORDING_MAIN, CALL_RECORDING_SUB};
-enum call_recording_channel {CH_OFF, CH_UPLINK, CH_DOWNLINK, CH_UDLINK};
-enum ganlite {wificall_off, wificall_on};
+
 #define DEACTIVE				0x00
 #define PLAYBACK_ACTIVE		0x01
 #define CAPTURE_ACTIVE		0x02
@@ -76,15 +78,7 @@ enum ganlite {wificall_off, wificall_on};
 #define CMD_RECOGNITION_ACTIVE		5	// Distingush recognition gain. To use MIC gain for recognition.
 #define CMD_CALL_FLAG_CLEAR		6	// Call flag clear for shutdown - to reduce pop up noise.
 #define CMD_CALL_END			7	// Codec off in call mode - to reduce pop up noise.
-#define GANLITE_ON        9
-#define GANLITE_OFF       10
-#define CMD_TTY_OFF     11
-#define CMD_TTY_ON      12
-#define CMD_HAC_OFF     15
-#define CMD_HAC_ON      16
 
-enum TTY_State {TTY_OFF, TTY_ON};
-enum HAC_State {HAC_OFF, HAC_ON};
 typedef void (*select_route)(struct snd_soc_codec *);
 typedef void (*select_mic_route)(struct snd_soc_codec *);
 
@@ -112,15 +106,11 @@ struct wm8994_priv {
 	enum power_state power_state;
 	enum state recognition_active;		// for control gain to voice recognition.
 	enum state ringtone_active;
-	enum voice_record_path call_record_path;
-	enum call_recording_channel call_record_ch;
-	enum state ganlite_active;
 	select_route *universal_playback_path;
 	select_route *universal_voicecall_path;
 	select_mic_route *universal_mic_path;
+	select_route *universal_voipcall_path;
 	int testmode_config_flag;	// for testmode.
-	unsigned int TTY_state;
-	unsigned int HAC_state;
 };
 
 #if defined SET_AUDIO_LOG
@@ -172,34 +162,28 @@ void wm8994_set_playback_extra_dock_speaker(struct snd_soc_codec *codec);
 void wm8994_set_voicecall_common_setting(struct snd_soc_codec *codec);
 void wm8994_set_voicecall_receiver(struct snd_soc_codec *codec);
 void wm8994_set_voicecall_headset(struct snd_soc_codec *codec);
-
-#if defined CONFIG_S5PC110_KEPLER_BOARD
-void wm8994_set_voicecall_tty(struct snd_soc_codec *codec);
-void wm8994_set_voicecall_receiver_audience(struct snd_soc_codec *codec); //hdlnc_ldj_0417_A1026
-void wm8994_set_voicecall_factory_subMIC(struct snd_soc_codec *codec); //hdlnc_ldj_0417_A1026
-#elif (defined CONFIG_S5PC110_HAWK_BOARD) ||(defined CONFIG_S5PC110_SIDEKICK_BOARD) || (defined CONFIG_S5PC110_VIBRANTPLUS_BOARD)
-void wm8994_set_voicecall_tty(struct snd_soc_codec *codec);
-void wm8994_set_voicecall_hac(struct snd_soc_codec *codec);
-#else
-void wm8994_set_voicecall_hac(struct snd_soc_codec *codec);
+#if (defined FEATURE_3POLE_CALL_SUPPORT)
+void wm8994_set_voicecall_headphone(struct snd_soc_codec *codec);
 #endif
-
 void wm8994_set_voicecall_speaker(struct snd_soc_codec *codec);
 void wm8994_set_voicecall_bluetooth(struct snd_soc_codec *codec);
-void wm8994_set_voicecall_headphone(struct snd_soc_codec *codec);
-void wm8994_set_voicecall_record(struct snd_soc_codec *codec, int path_num);
-void wm8994_call_recording_change_path(struct snd_soc_codec *codec);
-void wm8994_set_voicecall_record_off(struct snd_soc_codec *codec);
 void wm8994_set_fmradio_common(struct snd_soc_codec *codec, int onoff);
 void wm8994_set_fmradio_headset(struct snd_soc_codec *codec);
 void wm8994_set_fmradio_speaker(struct snd_soc_codec *codec);
 void wm8994_set_fmradio_headset_mix(struct snd_soc_codec *codec);
 void wm8994_set_fmradio_speaker_mix(struct snd_soc_codec *codec);
 void wm8994_set_fmradio_speaker_headset_mix(struct snd_soc_codec *codec);
+#if (defined FEATURE_VOIP)
+void wm8994_set_voipcall_receiver(struct snd_soc_codec *codec);
+void wm8994_set_voipcall_headset(struct snd_soc_codec *codec);
+#if (defined FEATURE_3POLE_CALL_SUPPORT)
+void wm8994_set_voipcall_headphone(struct snd_soc_codec *codec);
+#endif
+void wm8994_set_voipcall_speaker(struct snd_soc_codec *codec);
+void wm8994_set_voipcall_bluetooth(struct snd_soc_codec *codec);
+#endif
+
 #if defined WM8994_REGISTER_DUMP
 void wm8994_register_dump(struct snd_soc_codec *codec);
 #endif
-
-extern int call_state(void); // hdlnc_bp_ysyim
-
 #endif

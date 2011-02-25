@@ -122,7 +122,43 @@ struct S5PC110_clk_info {
 
 
 struct S5PC110_clk_info clk_info[] = {
-#if USE_1DOT2GHZ
+{
+	// APLL:1400,ARMCLK:1400,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
+	.armclk		=	1400* MHZ,
+	.apllout	=	1400* MHZ,
+	.apll_mps	=	((350<<16)|(6<<8)|1),
+	.msys_div0	=	(0|(6<<4)|(6<<8)|(1<<12)),
+	.msys_div0	=	0x1770,
+	.mpllout	=	667* MHZ,
+	.mpll_mps	=	((667<<16)|(12<<8)|(1)),
+	.psys_dsys_div0 =	((3<<16)|(1<<20)|(4<<24)|(1<<28)),
+	.div2val	=	((3<<0)|(3<<4)|(3<<8)),
+	.dmc0_div6 	=	(3<<28),
+},
+{
+	// APLL:1360,ARMCLK:1360,HCLK_MSYS:194,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
+	.armclk		=	1360* MHZ,
+	.apllout	=	1360* MHZ,
+	.apll_mps	=	((170<<16)|(3<<8)|1),
+	.msys_div0	=	(0|(5<<4)|(5<<8)|(1<<12)),
+	.mpllout	=	667* MHZ,
+	.mpll_mps	=	((667<<16)|(12<<8)|(1)),
+	.psys_dsys_div0 =	((3<<16)|(1<<20)|(4<<24)|(1<<28)),
+	.div2val	=	((3<<0)|(3<<4)|(3<<8)),
+	.dmc0_div6 	=	(3<<28),
+},
+{
+	// APLL:1280,ARMCLK:1280,HCLK_MSYS:182,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
+	.armclk		=	1280* MHZ,
+	.apllout	=	1280* MHZ,
+	.apll_mps	=	((160<<16)|(3<<8)|1),
+	.msys_div0	=	(0|(5<<4)|(5<<8)|(1<<12)),
+	.mpllout	=	667* MHZ,
+	.mpll_mps	=	((667<<16)|(12<<8)|(1)),
+	.psys_dsys_div0 =	((3<<16)|(1<<20)|(4<<24)|(1<<28)),
+	.div2val	=	((3<<0)|(3<<4)|(3<<8)),
+	.dmc0_div6 	=	(3<<28),
+},
 {
 	// APLL:1200,ARMCLK:1200,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
 	.armclk		=	1200* MHZ,
@@ -135,7 +171,18 @@ struct S5PC110_clk_info clk_info[] = {
 	.div2val	=	((3<<0)|(3<<4)|(3<<8)),
 	.dmc0_div6 	=	(3<<28),
 },
-#endif// A extra entry for 1200MHZ level 
+{
+	// APLL:1120,ARMCLK:1120,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
+	.armclk		=	1120* MHZ,
+	.apllout	=	1120* MHZ,
+	.apll_mps	=	((140<<16)|(3<<8)|1),
+	.msys_div0	=	(0|(4<<4)|(4<<8)|(1<<12)),
+	.mpllout	=	667* MHZ,
+	.mpll_mps	=	((667<<16)|(12<<8)|(1)),
+	.psys_dsys_div0 =	((3<<16)|(1<<20)|(4<<24)|(1<<28)),
+	.div2val	=	((3<<0)|(3<<4)|(3<<8)),
+	.dmc0_div6 	=	(3<<28),
+},
 {
 	// APLL:1000,ARMCLK:1000,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
 	.armclk		=	1000* MHZ,

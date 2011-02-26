@@ -56,7 +56,7 @@ loglevel 3
     insmod /lib/modules/param.ko
 
 # Backwards Compat - XXX: Going away in G*
-    symlink /mnt/sdcard /sdcard
+#    symlink /mnt/sdcard /sdcard
 
     mkdir /system
     mkdir /data 0771 system system
@@ -114,6 +114,9 @@ loglevel 3
     #mount yaffs2 mtd@system /system
     mount rfs /dev/block/stl9 /system check=no
     #mount yaffs2 mtd@system /system ro remount
+    
+		mount vfat /dev/block/mmcblk0p1 /sdcard
+		mount vfat /dev/block/mmcblk1p1 /sdcard/external_sd
 
 # use movinand second partition as /data. d.moskvitin
     exec apply_disk_policy

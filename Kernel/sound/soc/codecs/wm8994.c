@@ -36,7 +36,9 @@
 #include <plat/map-base.h>
 #include <mach/regs-clock.h> 
 #include "wm8994.h"
+#ifdef CONFIG_SND_VOODOO
 #include "wm8994_voodoo.h"
+#endif
 #if defined CONFIG_S5PC110_KEPLER_BOARD
 #include "A1026_regs.h"
 #include "A1026_dev.h"

@@ -2,7 +2,7 @@ VERSION = 2
 PATCHLEVEL = 6
 SUBLEVEL = 32
 EXTRAVERSION = .9
-NAME = Dragon-v5.0
+NAME = Dragon-v5.2
 
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
